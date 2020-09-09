@@ -377,12 +377,7 @@ fn pick_mesh(
                             // Transform the vertex to world space with the mesh transform, then
                             // into camera space with the view transform.
                             vertex_pos = mesh_to_cam_transform.transform_point3(vertex_pos);
-                            // This next part seems to be a bug with glam - it should do the divide
-                            // by w perspective math for us, instead we have to do it manually.
-                            // `glam` PR https://github.com/bitshifter/glam-rs/pull/75/files
-                            let transformed = projection_matrix.mul_vec4(vertex_pos.extend(1.0));
-                            let w_recip = transformed.w().abs().recip();
-                            triangle[i] = Vec3::from(transformed.truncate() * w_recip);
+                            triangle[i] = projection_matrix.transform_point3(vertex_pos);
                         }
                         if !triangle_behind_cam(triangle) {
                             if point_in_tri(
