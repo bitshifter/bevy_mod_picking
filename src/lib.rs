@@ -340,7 +340,7 @@ fn pick_mesh(
             // space using the mesh's transform, move it to the camera's space using the view
             // matrix (camera.inverse), and finally, apply the projection matrix. Because column
             // matrices are evaluated right to left, we have to order it correctly:
-            let mesh_to_cam_transform = view_matrix * transform.value;
+            let world_to_proj = projection_matrix * view_matrix * transform.value;
 
             // Get the vertex positions from the mesh reference resolved from the mesh handle
             let vertex_positions: Vec<[f32; 3]> = mesh
@@ -373,11 +373,10 @@ fn pick_mesh(
                         // NDC (normalized device coordinates)
                         for i in 0..3 {
                             // Get the raw vertex position using the index
-                            let mut vertex_pos = Vec3::from(vertex_positions[index[i] as usize]);
+                            let vertex_pos = Vec3::from(vertex_positions[index[i] as usize]);
                             // Transform the vertex to world space with the mesh transform, then
                             // into camera space with the view transform.
-                            vertex_pos = mesh_to_cam_transform.transform_point3(vertex_pos);
-                            triangle[i] = projection_matrix.transform_point3(vertex_pos);
+                            triangle[i] = world_to_proj.transform_point3(vertex_pos);
                         }
                         if !triangle_behind_cam(triangle) {
                             if point_in_tri(
